@@ -62,19 +62,19 @@ public class DemoQAFormTest {
 
     }
 
-    public void fillDate(String day, String month, String year) {
+    private void fillDate(String day, String month, String year) {
         $("#dateOfBirthInput").click();
         $(".react-datepicker__month-select").selectOptionByValue(month);
         $(".react-datepicker__year-select").selectOptionByValue(year);
         $$(".react-datepicker__day").find(text(day)).click();
     }
 
-    public void chooseSubject(String firstLetter, String subject) {
+    private void chooseSubject(String firstLetter, String subject) {
         $("#subjectsInput").setValue(firstLetter);
         $(byText(subject)).click();
     }
 
-    public void checkField(String field, String value) {
+    private void checkField(String field, String value) {
         $(byXpath("//td[text()='" + field + "']/following-sibling::td")).shouldHave(matchText(value));
     }
 }

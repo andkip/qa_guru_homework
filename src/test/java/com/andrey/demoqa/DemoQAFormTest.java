@@ -1,15 +1,15 @@
-package com.andrey;
+package com.andrey.demoqa;
 
 import com.codeborne.selenide.Configuration;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
-import static com.codeborne.selenide.Condition.matchText;
 import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Selectors.byText;
-import static com.codeborne.selenide.Selectors.byXpath;
 import static com.codeborne.selenide.Selenide.*;
 
 public class DemoQAFormTest {
@@ -18,7 +18,9 @@ public class DemoQAFormTest {
     String lastName = "LastName";
     String userEmail = "user@mail.ru";
     String userNumber = "8005553535";
+    String date = "25 December,2021";
     String gender = "Male";
+    String firstLetter = "a";
     String subject = "Arts";
     String hobby = "Music";
     String currentAddress = "New York, ulitsa Stroitelei, 21a";
@@ -32,7 +34,6 @@ public class DemoQAFormTest {
 
     @Test
     void selenideSearchTest() {
-        File kek = new File("src/test/java/resources/кек.jpg");
         open("https://demoqa.com/automation-practice-form");
 
         $("#firstName").setValue(firstName);
@@ -40,10 +41,10 @@ public class DemoQAFormTest {
         $("#userEmail").setValue(userEmail);
         $(byText(gender)).click();
         $("#userNumber").setValue(userNumber);
-        fillDate("25", "9", "2021");
-        chooseSubject("a", subject);
+        fillDate(date);
+        chooseSubject(firstLetter, subject);
         $(byText(hobby)).click();
-        $("#uploadPicture").uploadFile(kek);
+        $("#uploadPicture").uploadFromClasspath("pict.jpg");
         $("#currentAddress").setValue(currentAddress);
         $("#react-select-3-input").setValue(state).pressEnter();
         $("#react-select-4-input").setValue(city).pressEnter();
@@ -53,20 +54,22 @@ public class DemoQAFormTest {
         checkField("Student Email", userEmail);
         checkField("Gender", gender);
         checkField("Mobile", userNumber);
-        checkField("Date of Birth", "25 October,2021");
+        checkField("Date of Birth", date);
         checkField("Subjects", subject);
         checkField("Hobbies", hobby);
-        checkField("Picture", "кек.jpg");
+        checkField("Picture", "pict.jpg");
         checkField("Address", currentAddress);
         checkField("State and City", state + " " + city);
 
     }
 
-    private void fillDate(String day, String month, String year) {
+    private void fillDate(String date) {
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d MMMM,u", Locale.ENGLISH);
+        LocalDate parsedDate = LocalDate.parse(date, dateFormatter);
         $("#dateOfBirthInput").click();
-        $(".react-datepicker__month-select").selectOptionByValue(month);
-        $(".react-datepicker__year-select").selectOptionByValue(year);
-        $$(".react-datepicker__day").find(text(day)).click();
+        $(".react-datepicker__month-select").selectOptionByValue(String.valueOf(parsedDate.getMonthValue()-1));
+        $(".react-datepicker__year-select").selectOptionByValue(String.valueOf(parsedDate.getYear()));
+        $$(".react-datepicker__day").find(text(String.valueOf(parsedDate.getDayOfMonth()))).click();
     }
 
     private void chooseSubject(String firstLetter, String subject) {
@@ -75,6 +78,6 @@ public class DemoQAFormTest {
     }
 
     private void checkField(String field, String value) {
-        $(byXpath("//td[text()='" + field + "']/following-sibling::td")).shouldHave(matchText(value));
+        $x(("//td[text()='" + field + "']/following-sibling::td")).shouldHave(text(value));
     }
 }
